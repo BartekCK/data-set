@@ -3,6 +3,7 @@ from faker import Faker
 import random
 import pandas as pd
 from datetime import datetime
+import numpy as np
 
 fake = Faker()
 
@@ -58,5 +59,47 @@ def map_array_into_data_frame(arr):
 
 
 employee_list = create_employee_list(5000)
-employee_list_data_frame = map_array_into_data_frame(employee_list)
-print(employee_list_data_frame)
+worker_df = map_array_into_data_frame(employee_list)
+
+# SECOND LECTURE
+
+def make_widget_data(num):
+    
+    fake_widgets = [{'Item Number':id(y),
+                     'Step 1':np.random.gamma(shape=3, scale=1),
+                     'Step 2':np.random.normal(5), 
+                     'Step 3':np.random.exponential(4)} for y in range(num)]
+    
+    return fake_widgets
+
+
+dfs_list = []
+
+for index, row in worker_df.iterrows():
+    
+
+    
+    if row['contract_type'] == ContractType.FULL_TIME:
+        num_widgets = random.randrange(500, 1000)
+    elif row['contract_type'] == ContractType.PART_TIME:
+        num_widgets = random.randrange(100, 500)
+    else:
+        num_widgets = random.randrange(1, 1000)
+    
+    # make widgets for each worker
+    tmp_widgets = pd.DataFrame(make_widget_data(num=num_widgets))
+    
+    tmp_widgets['Worker ID'] = row['id']
+    
+
+    tmp_widgets['Item Number'] = tmp_widgets['Item Number'].astype('str')+ '-' + tmp_widgets['Worker ID'].astype('str')
+    
+
+    dfs_list.append(tmp_widgets)
+    
+widget_df = pd.concat(dfs_list)
+print(widget_df.shape)
+widget_df.head()
+
+worker_df.to_csv('./workers.csv', index=False)
+widget_df.to_csv('./widgets.csv', index=False)
